@@ -1,8 +1,6 @@
 import React, { useState, useRef } from 'react';
-import Button from '@mui/material/Button';
 
-function App() {
-
+const AudioRecorder = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [audioUrl, setAudioUrl] = useState(null);
   const mediaRecorderRef = useRef(null);
@@ -32,22 +30,16 @@ function App() {
     mediaRecorderRef.current.start();
 
     // 5秒後に録音停止
-    const recordTime = 5000; // 5 seconds 
     setTimeout(() => {
       mediaRecorderRef.current.stop();
-    }, recordTime);
+    }, 5000);
   };
 
   return (
     <div>
-      <Button 
-        variant="contained" 
-        color="primary" 
-        onClick={startRecording} 
-        disabled={isRecording}
-      >
+      <button onClick={startRecording} disabled={isRecording}>
         {isRecording ? 'Recording...' : 'Start Recording'}
-      </Button>
+      </button>
 
       {audioUrl && (
         <div>
@@ -56,7 +48,7 @@ function App() {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default AudioRecorder;
