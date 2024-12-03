@@ -1,51 +1,60 @@
 import React, { useState, useRef } from 'react';
+import Button from '@mui/material/Button';
+
+import RecordRTC from 'recordrtc';
 
 const AudioRecorder = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [audioUrl, setAudioUrl] = useState(null);
-  const mediaRecorderRef = useRef(null);
-  const audioChunksRef = useRef([]);
+  const recorderRef = useRef(null);
 
   const startRecording = async () => {
-    setIsRecording(true);
-    audioChunksRef.current = []; // 録音データの初期化
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      recorderRef.current = new RecordRTC(stream, {
+        type: 'audio',
+        mimeType: 'audio/wav',
+        recorderType: RecordRTC.StereoAudioRecorder,
+        numberOfAudioChannels: 1,
+        desiredSampRate: 44100
+      });
+      recorderRef.current.startRecording();
+      setIsRecording(true);
+    } catch (err) {
+      console.error('録音の開始に失敗しました:', err);
+    }
+  };
 
-    // マイクアクセスを要求
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    mediaRecorderRef.current = new MediaRecorder(stream);
+  const stopRecording = () => {
+    if (recorderRef.current) {
+      recorderRef.current.stopRecording(() => {
+        const blob = recorderRef.current.getBlob();
+        const audioUrl = URL.createObjectURL(blob);
+        setAudioUrl(audioUrl);
+        setIsRecording(false);
+      });
+    }
+  };
 
-    // データが得られるたびに保存
-    mediaRecorderRef.current.ondataavailable = (event) => {
-      audioChunksRef.current.push(event.data);
-    };
-
-    // 録音停止時にURLを生成
-    mediaRecorderRef.current.onstop = () => {
-      const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-      const audioUrl = URL.createObjectURL(audioBlob);
-      setAudioUrl(audioUrl);
-      setIsRecording(false);
-    };
-
-    mediaRecorderRef.current.start();
-
-    // 5秒後に録音停止
-    setTimeout(() => {
-      mediaRecorderRef.current.stop();
-    }, 5000);
+  const downloadRecording = () => {
+    if (audioUrl) {
+      const downloadLink = document.createElement('a');
+      downloadLink.href = audioUrl;
+      downloadLink.download = 'recording.wav';
+      downloadLink.click();
+    }
   };
 
   return (
     <div>
-      <button onClick={startRecording} disabled={isRecording}>
-        {isRecording ? 'Recording...' : 'Start Recording'}
-      </button>
-
+      <Button variant='contained' onClick={isRecording ? stopRecording : startRecording}>
+        {isRecording ? '停止' : '録音'}
+      </Button>
       {audioUrl && (
-        <div>
-          <h3>Recorded Audio:</h3>
-          <audio controls src={audioUrl}></audio>
-        </div>
+        <>
+          <audio controls src={audioUrl} />
+          <Button variant='contained' onClick={downloadRecording}>ダウンロード</Button>
+        </>
       )}
     </div>
   );
