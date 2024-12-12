@@ -6,7 +6,7 @@ import RecordRTC from 'recordrtc';
 const AudioRecorder = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [audioUrl, setAudioUrl] = useState(null);
-  const recorderRef = useRef(null);
+  const recorderRef = useRef<RecordRTC | null>(null);
 
   const startRecording = async () => {
     try {
@@ -47,13 +47,13 @@ const AudioRecorder = () => {
 
   return (
     <div>
-      <Button variant='contained' onClick={isRecording ? stopRecording : startRecording}>
+      <Button variant='contained' onClick={isRecording ? stopRecording : startRecording} sx={{ marginBottom: 2 }}>
         {isRecording ? '停止' : '録音'}
       </Button>
       {audioUrl && (
         <>
           <audio controls src={audioUrl} />
-          <Button variant='contained' onClick={downloadRecording}>ダウンロード</Button>
+          <Button variant='contained' onClick={downloadRecording} sx={{ marginBottom: 2 }}>ダウンロード</Button>
         </>
       )}
     </div>

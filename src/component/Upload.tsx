@@ -5,8 +5,7 @@ import { styled } from '@mui/system';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 const Upload = () => {
-  const [file, setFile] = useState(null);
-
+const [file, setFile] = useState<File | null>(null);
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
   };
